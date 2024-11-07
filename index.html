@@ -10,7 +10,7 @@
     <div class="container mx-auto p-4">
         <h1 class="text-3xl font-bold text-center mb-6">St. Louis County Personal Property Tax Calculator</h1>
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <p class="text-lg text-gray-700">This Personal Property Tax Calculator provides a estimate of the total amount of personal property tax you will have to pay for your vehicle based on price. The calculation values are based on 2024 tax year.</p>
+            <p class="text-lg text-gray-700">This Personal Property Tax Calculator provides an estimate of the total amount of personal property tax you will have to pay for your property based on price. The calculation values are based on the 2024 tax year.</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
             <form>
@@ -32,8 +32,8 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label for="vehicleValue" class="block text-sm font-medium text-gray-700">Vehicle Value</label>
-                    <input type="number" id="vehicleValue" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <label for="propertyValue" class="block text-sm font-medium text-gray-700">Property Value</label>
+                    <input placeholder="Input a number" type="number" id="propertyValue" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <div class="mb-4">
                     <label for="taxRate" class="block text-sm font-medium text-gray-700">Tax Rate (%)</label>
@@ -64,35 +64,52 @@
 </body>
 </html>
 <script>
-    document.getElementById('vehicleValue').addEventListener('input', function() {
-        const vehicleValue = parseFloat(document.getElementById('vehicleValue').value);
+    function calculateTax() {
+        const propertyType = document.querySelector('input[name="propertyType"]:checked').value;
+        const propertyValue = parseFloat(document.getElementById('propertyValue').value);
         const taxRate = parseFloat(document.getElementById('taxRate').value);
         
-        if (isNaN(vehicleValue) || vehicleValue <= 0) {
-            document.getElementById('result').textContent = 'Please enter a valid vehicle value.';
+        if (isNaN(propertyValue) || propertyValue <= 0) {
+            document.getElementById('result').textContent = `No results`;
             return;
         }
         
-        const assessedValue = vehicleValue * 0.3333333;
+        let assessedValue;
+        if (propertyType === 'vehicle') {
+            assessedValue = propertyValue * 0.3333333;
+        } else if (propertyType === 'residential') {
+            assessedValue = propertyValue * 0.19;
+        } else if (propertyType === 'commercial') {
+            assessedValue = propertyValue * 0.32;
+        }
+        
         const taxAmount = (assessedValue / 100) * taxRate;
         
         document.getElementById('result').textContent = `Your estimated personal property tax is $${taxAmount.toFixed(2)}`;
-    });
+    }
+
+    function updateTaxRate() {
+        const propertyType = document.querySelector('input[name="propertyType"]:checked').value;
+        const taxRateInput = document.getElementById('taxRate');
+        
+        if (propertyType === 'commercial') {
+            taxRateInput.value = 10.0108;
+        } else {
+            taxRateInput.value = 8.3708;
+        }
+    }
 
     document.querySelector('form').addEventListener('submit', function(event) {
         event.preventDefault();
-        
-        const vehicleValue = parseFloat(document.getElementById('vehicleValue').value);
-        const taxRate = parseFloat(document.getElementById('taxRate').value);
-        
-        if (isNaN(vehicleValue) || vehicleValue <= 0) {
-            alert('Please enter a valid vehicle value.');
-            return;
-        }
-        
-        const assessedValue = vehicleValue * 0.3333333;
-        const taxAmount = (assessedValue / 100) * taxRate;
-        
-        document.getElementById('result').textContent = `Your estimated personal property tax is $${taxAmount.toFixed(2)}`;
+        calculateTax();
+    });
+
+    document.getElementById('propertyValue').addEventListener('input', calculateTax);
+
+    document.querySelectorAll('input[name="propertyType"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            updateTaxRate();
+            calculateTax();
+        });
     });
 </script>
